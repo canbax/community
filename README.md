@@ -57,3 +57,7 @@ If you have any question about the code or you want to report a bug, please cont
     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+## small notes
+
+    - for large graphs modularity value might overflow
+    - to make algorithm faster, after a consistent decrease in modularity values, stop calling CmtyGirvanNewmanStep
