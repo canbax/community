@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 _DEBUG_ = False
 # command to run 
-# python cmty.py graph.txt -g -d -b -m -c
+# python cmty.py graph.txt -g -d -b -m -c -s 10
 # -g means draw graph after built
 # -d means debug mode
 # -b means plot betweenes values
@@ -83,15 +83,24 @@ def UpdateDeg(A, nodes):
 	return deg_dict
 
 #run GirvanNewman algorithm and find the best community split by maximizing modularity measure
-def runGirvanNewman(G, Orig_deg, m_, modularities, bwt_values):
+def runGirvanNewman(G, Orig_deg, m_, modularities, bwt_values, cut_off):
 	#let's find the best split of the graph
 	BestQ = 0.0
 	Q = 0.0
 	Bestcomps_t = []
 	best_graph = nx.Graph()
+	prev_mod = None
+	curr_mod = None
+	successive_decrease_count = 0
+
 	while True:    
 		CmtyGirvanNewmanStep(G, bwt_values)
 		Q = _GirvanNewmanGetModularity(G, Orig_deg, m_);
+		curr_mod = Q
+		if prev_mod > curr_mod:
+			successive_decrease_count = successive_decrease_count + 1
+		if cut_off != None and successive_decrease_count > cut_off:
+			break
 		modularities.append(Q)
 		#print "Modularity of decomposed G: %f" % Q
 		if Q > BestQ:
@@ -100,6 +109,7 @@ def runGirvanNewman(G, Orig_deg, m_, modularities, bwt_values):
 				best_graph = G.copy()
 		if G.number_of_edges() == 0:
 				break
+		prev_mod = curr_mod
 	return best_graph
 
 def main(argv):
@@ -116,7 +126,9 @@ def main(argv):
 		return 1
 	graph_fn = argv[1]
 	
-	for a in argv:
+	cut_off = None
+
+	for ind, a in enumerate(argv):
 		if a == '-d':
 			_DEBUG_ = True
 		elif a == '-g':
@@ -127,6 +139,9 @@ def main(argv):
 			plot_modularity = True
 		elif a == '-c':
 			draw_community = True
+		elif a == '-s':
+			has_cut_off = True
+			cut_off = (int)(argv[ind + 1])
 
 	G = nx.Graph()  #let's create the graph first
 	
@@ -162,7 +177,7 @@ def main(argv):
 	bwt_values = []
 	#run Newman alg
 	start = time.time()
-	best_graph = runGirvanNewman(G, Orig_deg, m_, modularities, bwt_values)
+	best_graph = runGirvanNewman(G, Orig_deg, m_, modularities, bwt_values, cut_off)
 	end = time.time()
 	print 'algo run in %f' % (end - start), ' seconds'
 	
