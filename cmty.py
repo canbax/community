@@ -15,6 +15,7 @@ _DEBUG_ = False
 # -b means plot betweenes values
 # -m means plot modularity values
 # -c means draw community structure
+# for large graphs modularity value might overflow
 
 #this method just reads the graph structure from the file
 def buildG(G, file_, delimiter_):
